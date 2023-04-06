@@ -1,5 +1,6 @@
 import sys
 import json
+import time 
 
 class ParkingLot:
 
@@ -28,11 +29,23 @@ class ParkingLot:
         print("Created a parking lot with", size, "slots.")
 
     def park_car(self, car_number):
-        if len(self.cars) >= self.spaces:
-            print("No available parking spaces.")
-        else:
-            self.cars[car_number] = None
-            print("Parking car with number", car_number, ".")
+        self.load_state()
+        # print(self.state)
+        # Find the first empty slot
+        for slot_id, slot_data in self.state["slots"].items():
+            print(slot_data)
+            if slot_data is None or slot_data["parking_status"] == 0:
+                current_time = int(time.time())
+                self.state["slots"][slot_id] = {
+                    "car_number": car_number,
+                    "parking_time": current_time,
+                    "leaving_time": None,
+                    "total_cost": None,
+                    "parking_status": 1
+                }
+                self.save_state()
+                print("Allocated slot number:", slot_id)
+                return
 
     def leave_parking_lot(self, car_number, hours):
         if car_number not in self.cars:
@@ -43,9 +56,9 @@ class ParkingLot:
             print("Car with number", car_number, "has left the parking lot after", hours, "hours. The cost is $", cost, ".")
 
     def display_parking_lot_status(self):
-        print("Parking lot status:")
-        print("Total spaces:", self.spaces)
-        print("Available spaces:", self.spaces - len(self.cars))
+        print("Parking lot status:"
+            "Total spaces:", self.spaces,
+            "Available spaces:", self.spaces - len(self.cars))
         print("Occupied spaces:", len(self.cars))
         print("Cars parked:", ", ".join(self.cars.keys()))
 

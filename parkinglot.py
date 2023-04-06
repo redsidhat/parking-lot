@@ -64,12 +64,16 @@ class ParkingLot:
 
     def display_parking_lot_status(self):
         self.load_state()
+        occupied_slots = [slotid for slotid, value in self.state["slots"].items() if value["parking_status"] == 1]
         print("Parking lot status:"
-            "Total spaces:", self.spaces,
-            "Available spaces:", self.spaces - len(self.cars))
-        print("Occupied spaces:", len(self.cars))
-        print("Cars parked:", ", ".join(self.cars.keys()))
+            "\nTotal spaces:", len(self.state["slots"]),
+            "\nAvailable spaces:", self.state["spaces"],
+            "Slot Id car")
 
+        for slot in occupied_slots:
+            print(slot, " ", self.state["slots"][slot]["car_number"])
+
+        
 def usage(accepted_arguments):
     print("Usage: python3 script_name.py [command]")
     print("Accepted commands:", ", ".join(accepted_arguments))

@@ -38,14 +38,13 @@ class ParkingLot:
             return #There is no need to loop through the file if ther are no spaces left 
         for slot_id, slot_data in self.state["slots"].items():
             # print(slot_data)
-            if slot_data is None or slot_data["parking_status"] == 0:
+            if slot_data is None:
                 current_time = int(time.time())
                 self.state["slots"][slot_id] = {
                     "car_number": car_number,
                     "parking_time": current_time,
                     "leaving_time": None,
                     "total_cost": None,
-                    "parking_status": 1
                 }
                 self.state["spaces"] = self.state["spaces"]-1
                 
@@ -64,14 +63,18 @@ class ParkingLot:
 
     def display_parking_lot_status(self):
         self.load_state()
-        occupied_slots = [slotid for slotid, value in self.state["slots"].items() if value["parking_status"] == 1]
+        # occupied_slots = [slotid for slotid, value in self.state["slots"].items() if value["parking_status"] == 1]
         print("Parking lot status:"
             "\nTotal spaces:", len(self.state["slots"]),
             "\nAvailable spaces:", self.state["spaces"],
-            "Slot Id car")
+            "\nSlot_Id  Car_number")
+        # for key, value in self.state["slots"].items():
+        #     print(key, value)
+        #Making the null finding faster
+        non_null_dict = {key: value["car_number"] for key, value in self.state["slots"].items() if value is not None}
+        for key, value in non_null_dict.items():
+            print(key, "          ", value) #behold the beauty of spaces
 
-        for slot in occupied_slots:
-            print(slot, " ", self.state["slots"][slot]["car_number"])
 
         
 def usage(accepted_arguments):

@@ -15,16 +15,17 @@ class ParkingLot:
             with open(self.state_file) as f:
                 self.state = json.load(f)
         except FileNotFoundError:
-            self.state = {"slots": {}}
+            print("No statefile found. Create a parking lot first")
 
     def save_state(self):
         with open(self.state_file, "w") as f:
             json.dump(self.state, f)
             
     def create_parking_lot(self, size):
-        self.spaces = int(size)
+        self.state["spaces"] = int(size)
         print("Creating a parking lot with", size, "spaces.")
         self.state["slots"] = {str(i): None for i in range(1, int(size) + 1)}
+        
         self.save_state()
         print("Created a parking lot with", size, "slots.")
 
@@ -32,8 +33,11 @@ class ParkingLot:
         self.load_state()
         # print(self.state)
         # Find the first empty slot
+        if self.state["spaces"] == 0:
+            print("Parking is curerntly full.")
+            return #There is no need to loop through the file if ther are no spaces left 
         for slot_id, slot_data in self.state["slots"].items():
-            print(slot_data)
+            # print(slot_data)
             if slot_data is None or slot_data["parking_status"] == 0:
                 current_time = int(time.time())
                 self.state["slots"][slot_id] = {
@@ -43,9 +47,12 @@ class ParkingLot:
                     "total_cost": None,
                     "parking_status": 1
                 }
+                self.state["spaces"] = self.state["spaces"]-1
+                
                 self.save_state()
                 print("Allocated slot number:", slot_id)
                 return
+
 
     def leave_parking_lot(self, car_number, hours):
         if car_number not in self.cars:
@@ -56,6 +63,7 @@ class ParkingLot:
             print("Car with number", car_number, "has left the parking lot after", hours, "hours. The cost is $", cost, ".")
 
     def display_parking_lot_status(self):
+        self.load_state()
         print("Parking lot status:"
             "Total spaces:", self.spaces,
             "Available spaces:", self.spaces - len(self.cars))

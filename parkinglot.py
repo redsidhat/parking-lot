@@ -21,12 +21,6 @@ class ParkingLot:
         with open(self.state_file, "w") as f:
             json.dump(self.state, f)
 
-    def update_on_match(self, dictionary, key, match_value):
-        for k, v in dictionary.items():
-            if isinstance(v, dict):
-                self.update_on_match(v, key, match_value)
-            elif k == key and v == match_value:
-                dictionary[k] = None
 
     def create_parking_lot(self, size):
         self.state["spaces"] = int(size)
@@ -58,13 +52,35 @@ class ParkingLot:
                 return
 
 
-    def leave_parking_lot(self, car_number, hours):
-        if car_number not in self.state["slots"]["car_number"]:
-            print("Car with number", car_number, "not found.")
+    def leave_parking_lot(self, car_number):
+        self.load_state()
+        print(car_number)
+        car_parking_map={}
+        # print(self.state["slots"].items())
+        car_parking_map = {value["car_number"]: key for key, value in self.state["slots"].items() if value is not None}
+        if car_number in car_parking_map:
+            print("car is parked in slot ", car_parking_map[car_number])
+            parked_since=self.state["slots"][car_parking_map[car_number]]["parking_time"] #its a choice between spending one more local variable vs hurting the next person to read this
+            current_time = int(time.time())
+            parked_hours = (current_time-parked_since)/3600 
+            parked_hours_round_up = int(parked_hours)+int(parked_hours % 1 != 0) #or use a math lib 
+            print("Total parking hours round up ", parked_hours_round_up)
         else:
-            cost = int(hours) * 10 # $10 per hour
-            del self.cars[car_number]
-            print("Car with number", car_number, "has left the parking lot after", hours, "hours. The cost is $", cost, ".")
+            print("No cars")
+        # id_key = car_number_to_id_map.get(car_number)
+
+        # if id_key:
+        #     print("The id key for car number", car_number, "is", id_key)
+        # else:
+        #     print("Car number", car_number, "not found")
+
+
+
+        # if my_dict.get('person2', {}).get('address', {}).get('city', '') == 'Los Angeles':
+        #     #cost = int(hours) * 10 # $10 per hour
+        #     keys_to_delete = [car_number for car_number, value in self.state["slots"]["car_number"].items() if value == car_number]
+        #     print(keys_to_delete)
+        #     #print("Car with number", car_number, "has left the parking lot after", hours, "hours. The cost is $", cost, ".")
 
     def display_parking_lot_status(self):
         self.load_state()
@@ -101,8 +117,8 @@ def main():
         elif sys.argv[1] == "park" and len(sys.argv) == 3:
             parking_lot.park_car(sys.argv[2])
 
-        elif sys.argv[1] == "leave" and len(sys.argv) == 4:
-            parking_lot.leave_parking_lot(sys.argv[2], sys.argv[3])
+        elif sys.argv[1] == "leave" and len(sys.argv) == 3:
+            parking_lot.leave_parking_lot(sys.argv[2])
 
         elif sys.argv[1] == "status":
             parking_lot.display_parking_lot_status()

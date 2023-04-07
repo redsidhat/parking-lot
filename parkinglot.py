@@ -20,7 +20,14 @@ class ParkingLot:
     def save_state(self):
         with open(self.state_file, "w") as f:
             json.dump(self.state, f)
-            
+
+    def update_on_match(self, dictionary, key, match_value):
+        for k, v in dictionary.items():
+            if isinstance(v, dict):
+                self.update_on_match(v, key, match_value)
+            elif k == key and v == match_value:
+                dictionary[k] = None
+
     def create_parking_lot(self, size):
         self.state["spaces"] = int(size)
         print("Creating a parking lot with", size, "spaces.")
@@ -42,9 +49,7 @@ class ParkingLot:
                 current_time = int(time.time())
                 self.state["slots"][slot_id] = {
                     "car_number": car_number,
-                    "parking_time": current_time,
-                    "leaving_time": None,
-                    "total_cost": None,
+                    "parking_time": current_time
                 }
                 self.state["spaces"] = self.state["spaces"]-1
                 
@@ -54,7 +59,7 @@ class ParkingLot:
 
 
     def leave_parking_lot(self, car_number, hours):
-        if car_number not in self.cars:
+        if car_number not in self.state["slots"]["car_number"]:
             print("Car with number", car_number, "not found.")
         else:
             cost = int(hours) * 10 # $10 per hour
@@ -80,7 +85,7 @@ class ParkingLot:
 def usage(accepted_arguments):
     print("Usage: python3 script_name.py [command]")
     print("Accepted commands:", ", ".join(accepted_arguments))
-
+ 
 def main():
     # Define the list of accepted arguments
     accepted_arguments = ["create", "park", "leave", "status"]
@@ -92,12 +97,16 @@ def main():
     if len(sys.argv) > 1 and sys.argv[1] in accepted_arguments:
         if sys.argv[1] == "create" and len(sys.argv) == 3:
             parking_lot.create_parking_lot(sys.argv[2])
+
         elif sys.argv[1] == "park" and len(sys.argv) == 3:
             parking_lot.park_car(sys.argv[2])
+
         elif sys.argv[1] == "leave" and len(sys.argv) == 4:
             parking_lot.leave_parking_lot(sys.argv[2], sys.argv[3])
+
         elif sys.argv[1] == "status":
             parking_lot.display_parking_lot_status()
+
         else:
             usage(accepted_arguments)
     else:

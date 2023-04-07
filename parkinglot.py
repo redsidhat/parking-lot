@@ -6,7 +6,7 @@ class ParkingLot:
 
     def __init__(self):
         self.spaces = 0
-        self.cars = {}
+        self.hourly_cost = 10
         self.state_file = "parking_lot_state.json"
         self.state = {} 
 
@@ -52,19 +52,21 @@ class ParkingLot:
 
     def leave_parking_lot(self, car_number):
         self.load_state()
-        print(car_number)
+        # print(car_number)
         car_parking_map={}
         # print(self.state["slots"].items())
         car_parking_map = {value["car_number"]: key for key, value in self.state["slots"].items() if value is not None}
         if car_number in car_parking_map:
-            print("car is parked in slot ", car_parking_map[car_number])
             parked_since=self.state["slots"][car_parking_map[car_number]]["parking_time"] #its a choice between spending one more local variable vs hurting the next person to read this
             current_time = int(time.time())
             parked_hours = (current_time-parked_since)/3600 
             parked_hours_round_up = int(parked_hours)+int(parked_hours % 1 != 0) #or use a math lib 
-            print("Total parking hours round up ", parked_hours_round_up)
+            cost = max(10, 10 + (parked_hours_round_up - 2) * 10) #Cars can't literaly leave within a second after parking.
+            print("Registration Number", car_number,"from Slot",car_parking_map[car_number], "has left with Charge", cost)
+            self.state["slots"][car_parking_map[car_number]] = None # Marking the slot empty
+            self.save_state()
         else:
-            print("No cars")
+            print("Registration Number",car_number,"not found")
 
 
     def display_parking_lot_status(self):

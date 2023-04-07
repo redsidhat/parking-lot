@@ -32,13 +32,11 @@ class ParkingLot:
 
     def park_car(self, car_number):
         self.load_state()
-        # print(self.state)
         # Find the first empty slot
         if self.state["spaces"] == 0:
             print("Parking is curerntly full.")
             return #There is no need to loop through the file if ther are no spaces left 
         for slot_id, slot_data in self.state["slots"].items():
-            # print(slot_data)
             if slot_data is None:
                 current_time = int(time.time())
                 self.state["slots"][slot_id] = {
@@ -67,30 +65,15 @@ class ParkingLot:
             print("Total parking hours round up ", parked_hours_round_up)
         else:
             print("No cars")
-        # id_key = car_number_to_id_map.get(car_number)
 
-        # if id_key:
-        #     print("The id key for car number", car_number, "is", id_key)
-        # else:
-        #     print("Car number", car_number, "not found")
-
-
-
-        # if my_dict.get('person2', {}).get('address', {}).get('city', '') == 'Los Angeles':
-        #     #cost = int(hours) * 10 # $10 per hour
-        #     keys_to_delete = [car_number for car_number, value in self.state["slots"]["car_number"].items() if value == car_number]
-        #     print(keys_to_delete)
-        #     #print("Car with number", car_number, "has left the parking lot after", hours, "hours. The cost is $", cost, ".")
 
     def display_parking_lot_status(self):
         self.load_state()
-        # occupied_slots = [slotid for slotid, value in self.state["slots"].items() if value["parking_status"] == 1]
         print("Parking lot status:"
             "\nTotal spaces:", len(self.state["slots"]),
             "\nAvailable spaces:", self.state["spaces"],
             "\nSlot_Id  Car_number")
-        # for key, value in self.state["slots"].items():
-        #     print(key, value)
+
         #Making the null finding faster
         non_null_dict = {key: value["car_number"] for key, value in self.state["slots"].items() if value is not None}
         for key, value in non_null_dict.items():
